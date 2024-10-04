@@ -11,9 +11,9 @@ const redirectUri = Deno.env.get("DISCORD_REDIRECT_URI");
 
 router.get("/", (context) => {
   // OAuth2認証のリンクを生成
-  context.response.body = `<a href="https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
+  context.response.body = `<a href="https://discord.com/oauth2/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(
     redirectUri!
-  )}&response_type=code&scope=identify guilds.join">Login with Discord</a>`;
+  )}&scope=identify guilds.join guilds">Login with Discord</a>`;
 });
 
 router.get("/callback", async (context) => {
@@ -25,7 +25,7 @@ router.get("/callback", async (context) => {
       const userInfo = await getUserInfo(accessToken);
 
       // ユーザーにロールを追加
-      const roleAdded = await addRoleToUser(userInfo.id);
+      const roleAdded = await addRoleToUser(userInfo.id, accessToken);
       if (roleAdded) {
         await saveToken(userInfo.id, accessToken);
         context.response.body = "Successfully authenticated and role assigned!";
